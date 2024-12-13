@@ -96,32 +96,35 @@ required_columns = [
     'ADD_ADDRESS_COUNTRY_CODE', 'BUS_ADDRESS_POSTAL_CODE', 'BUS_ADDRESS_DISTRICT',
     'BUS_ADDRESS_COUNTRY_CODE', 'ACC_DATE', 'DOC_TP', 'DOC_NO', 'DOC_ISSUE_DATE',
     'DOC_ISSUE_COUNTRY_CODE', 'PHONE_NO', 'MAKE_BY', 'MAKE_DT', 'AUTH_BY', 'AUTH_DT',
-    'STATUS', 'CUST_ID', 'SECTOR_CODE', 'GENDER', 'DATE_OF_BIRTH', 'PLACE_BIRTH_DIST',
-    'NATIONAL_ID_NUMBER', 'TIN', 'ADDRESS_STREET_NO', 'ADDRESS_POSTAL_CODE',
-    'ADDRESS_DISTRICT', 'ADD_ADDRESS_STREET_NO', 'ADD_ADDRESS_POSTAL_CODE',
-    'ADD_ADDRESS_DISTRICT'
+    'STATUS', 'CUST_ID', 'ADDRESS_POSTAL_CODE', 'ADD_ADDRESS_POSTAL_CODE'
 ]
 
-# Filter data
-personal_data = df_renamed[required_columns]
-personal_data = personal_data[~personal_data['FI_SUBJECT_CODE'].str.contains('C0000000nan', na=False)]
-personal_data = personal_data.dropna(subset=['FI_SUBJECT_CODE'])
-personal_data = personal_data.drop_duplicates(subset=['FI_SUBJECT_CODE'])
+df_renamed = df_renamed[required_columns]
 
-# Update or create personal.csv
+# ========================== Handle Existing Data in personal.csv ==========================
+
+# Check if the personal_output_file exists and load it
 if os.path.exists(personal_output_file):
-    existing_data = pd.read_csv(personal_output_file)
-    existing_client_ids = set(existing_data['FI_SUBJECT_CODE'].unique())
-    new_client_ids = set(personal_data['FI_SUBJECT_CODE'].unique())
-
-    new_rows = personal_data[personal_data['FI_SUBJECT_CODE'].isin(new_client_ids - existing_client_ids)]
-    new_rows.to_csv(personal_output_file, index=False)
-    print(f"Updated '{personal_output_file}' with {len(new_rows)} new rows. Previous rows removed.")
+    # Load existing personal data
+    existing_personal_data = pd.read_csv(personal_output_file)
+    # Extract existing FI_SUBJECT_CODE values from the previous file
+    existing_fi_codes = existing_personal_data['FI_SUBJECT_CODE'].unique()
+    
+    # Filter the input data to only include new rows (those not already in personal.csv)
+    new_data = df_renamed[~df_renamed['FI_SUBJECT_CODE'].isin(existing_fi_codes)]
 else:
-    personal_data.to_csv(personal_output_file, index=False)
-    print(f"File '{personal_output_file}' created successfully!")
+    # If personal.csv doesn't exist, treat all rows as new
+    new_data = df_renamed
+
+# ========================== Save New Data to personal.csv ==========================
+# If there are new rows, overwrite personal.csv with only those
+if not new_data.empty:
+    new_data.to_csv(personal_output_file, mode='w', index=False)
+else:
+    print("No new rows to add to personal.csv.")
 
 # ========================== Financial Data Processing ==========================
+
 # Add financial data fields
 df_financial = input_data.copy()
 df_financial['F_I_SUBJECT_CODE'] = 'C0000000' + df_financial['CLIENT ID'].astype(str)
