@@ -106,6 +106,6 @@ CLIENT ID,F_I_SUBJECT_CODE,F_I_CONTRACT_CODE,DATE_OF_CLASSIFICATION,RECORD_TYPE,
 
 ## **License**
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License].LICENSE
 
 ---
