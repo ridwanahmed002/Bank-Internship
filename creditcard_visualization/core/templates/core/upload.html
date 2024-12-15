@@ -20,7 +20,6 @@
         function displayFileName() {
             const fileInput = document.getElementById("file");
             const fileNameDisplay = document.getElementById("file-name");
-
             if (fileInput.files.length > 0) {
                 fileNameDisplay.textContent = fileInput.files[0].name;
             } else {
@@ -33,6 +32,12 @@
         <p>File "{{ file_name }}" uploaded successfully! You can view the file here: 
             <a href="{{ file_url }}" target="_blank">View File</a>
         </p>
+        <!-- Buttons to Navigate to Other Pages -->
+        <div>
+            <a href="{% url 'check_header' %}"><button>Check Header</button></a>
+            <a href="{% url 'visualize_data' %}"><button>Visualize Data</button></a>
+            <a href="{% url 'extract_csv' %}"><button>Extract CSV</button></a>
+        </div>
     {% endif %}
 </body>
 </html>
