@@ -1,3 +1,111 @@
-<h1>Visualize Data</h1>
-<p>This page will allow you to select columns and visualize the data.</p>
-<a href="{% url 'upload_file' %}">Back</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualize Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+        .container {
+            background: #ffffff;
+            margin-top: 50px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Visualize Your Dataset</h1>
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% else %}
+            <!-- Visualization Form -->
+            <form method="POST" id="visualize-form">
+                {% csrf_token %}
+
+                <!-- Chart Type Selection -->
+                <div class="mb-3">
+                    <label for="chart_type" class="form-label">Select Chart Type</label>
+                    <select name="chart_type" id="chart_type" class="form-control" onchange="updateColumnOptions()" required>
+                        <option value="">-- Select Chart Type --</option>
+                        <option value="bar">Bar Chart</option>
+                        <option value="pie">Pie Chart</option>
+                        <option value="scatter">Scatter Plot</option>
+                        <option value="box">Box Plot</option>
+                    </select>
+                </div>
+
+                <!-- Column Selection -->
+                <div id="column-selection">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="col_x" class="form-label">Select Column X</label>
+                            <select name="col_x" id="col_x" class="form-control" required>
+                                <option value="">-- Select Column --</option>
+                                {% for col in numeric_columns %}
+                                    <option value="{{ col }}">{{ col }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="col_y" class="form-label">Select Column Y</label>
+                            <select name="col_y" id="col_y" class="form-control">
+                                <option value="">-- Select Column --</option>
+                                {% for col in numeric_columns %}
+                                    <option value="{{ col }}">{{ col }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add More Columns -->
+                <div id="extra-columns" class="mb-3">
+                    <button type="button" class="btn btn-outline-secondary" onclick="addMoreColumns()">Add Another Column</button>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Generate Chart</button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="{% url 'upload_file' %}" class="btn btn-secondary">Back</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function addMoreColumns() {
+            const columnSection = document.getElementById("extra-columns");
+            const newColumn = document.createElement("div");
+            newColumn.className = "row mb-3";
+            newColumn.innerHTML = `
+                <div class="col-md-6">
+                    <label class="form-label">Select Additional Column</label>
+                    <select name="extra_columns[]" class="form-control">
+                        <option value="">-- Select Column --</option>
+                        {% for col in numeric_columns %}
+                            <option value="{{ col }}">{{ col }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            `;
+            columnSection.before(newColumn);
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
