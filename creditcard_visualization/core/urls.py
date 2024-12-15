@@ -8,5 +8,6 @@ urlpatterns = [
     path("visualize-data/", views.visualize_data, name="visualize_data"),
     path("extract-csv/", views.extract_csv, name="extract_csv"),
     path("visualize-data/", views.visualize_data, name="visualize_data"),
+    path("view-csv/<str:file_type>/", views.view_csv, name="view_csv"),
 
 ]

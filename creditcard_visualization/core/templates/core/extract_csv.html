@@ -1,3 +1,61 @@
-<h1>Extract CSV</h1>
-<p>This page will run the extraction script and return two files.</p>
-<a href="{% url 'upload_file' %}">Back</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract CSV</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .message {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .download-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Extract CSV</h1>
+
+        {% if success %}
+        <div class="download-links">
+            <p>Download the extracted files:</p>
+            <a href="{{ personal_file_url }}" class="btn btn-primary" download>Download Personal CSV</a>
+            <a href="{{ financial_file_url }}" class="btn btn-primary" download>Download Financial CSV</a>
+        </div>
+        
+        <div class="text-center mt-3">
+            <p>Or view the extracted files:</p>
+            <a href="{% url 'view_csv' file_type='personal' %}" class="btn btn-outline-primary">View Personal CSV</a>
+            <a href="{% url 'view_csv' file_type='financial' %}" class="btn btn-outline-primary">View Financial CSV</a>
+        </div>
+        
+        {% elif error %}
+            <div class="alert alert-danger message">{{ error }}</div>
+        {% else %}
+            <div class="alert alert-info message">Click to extract CSV files.</div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{% url 'upload_file' %}" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+</body>
+</html>

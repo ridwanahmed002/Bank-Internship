@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 from .forms import FileUploadForm
 from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 import pandas as pd
+import subprocess
 import os
 import matplotlib
 matplotlib.use('Agg')  
@@ -161,5 +163,68 @@ def visualize_data(request):
     return render(request, "core/visualize_data.html", context)
 
 def extract_csv(request):
-    # Placeholder for CSV extraction logic
-    return render(request, "core/extract_csv.html")
+    context = {}
+    script_path = os.path.join(settings.BASE_DIR, "script.py")
+    uploaded_file_url = request.session.get("uploaded_file_url")
+
+    if not uploaded_file_url:
+        context["error"] = "No file uploaded. Please upload a file first."
+        return render(request, "core/extract_csv.html", context)
+
+    input_file = os.path.join(settings.BASE_DIR, uploaded_file_url.strip("/"))
+    output_dir = os.path.join(settings.MEDIA_ROOT, "extracted_csvs")
+    os.makedirs(output_dir, exist_ok=True)
+
+    personal_output_file = os.path.join(output_dir, "personal.csv")
+    processed_ids_file = os.path.join(output_dir, "processed_ids.csv")
+    financial_output_file = os.path.join(output_dir, "financial.csv")
+
+    try:
+        print(f"Running script.py with arguments:")
+        print(f"Input File: {input_file}")
+        print(f"Personal Output: {personal_output_file}")
+        print(f"Processed IDs: {processed_ids_file}")
+        print(f"Financial Output: {financial_output_file}")
+
+        subprocess.run([
+            "python", script_path,
+            input_file, personal_output_file, processed_ids_file, financial_output_file
+        ], check=True)
+
+        context["success"] = "CSV files successfully extracted!"
+        context["personal_file_url"] = os.path.join(settings.MEDIA_URL, "extracted_csvs/personal.csv")
+        context["processed_ids_file_url"] = os.path.join(settings.MEDIA_URL, "extracted_csvs/processed_ids.csv")
+        context["financial_file_url"] = os.path.join(settings.MEDIA_URL, "extracted_csvs/financial.csv")
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {str(e)}")
+        context["error"] = f"Error running script: {str(e)}"
+
+    return render(request, "core/extract_csv.html", context)
+
+def view_csv(request, file_type):
+    """
+    View to display the content of personal.csv or financial.csv
+    based on the file_type passed in the URL.
+    """
+    output_dir = os.path.join(settings.MEDIA_ROOT, "extracted_csvs")
+    file_path = None
+
+    # Determine which file to display
+    if file_type == "personal":
+        file_path = os.path.join(output_dir, "personal.csv")
+    elif file_type == "financial":
+        file_path = os.path.join(output_dir, "financial.csv")
+    else:
+        return render(request, "core/view_csv.html", {"error": "Invalid file type."})
+
+    # Check if file exists
+    if not os.path.exists(file_path):
+        return render(request, "core/view_csv.html", {"error": f"File '{file_type}.csv' not found."})
+
+    # Read the CSV content using pandas
+    try:
+        df = pd.read_csv(file_path)
+        data_html = df.to_html(classes="table table-bordered table-striped", index=False)
+        return render(request, "core/view_csv.html", {"data": data_html, "file_type": file_type})
+    except Exception as e:
+        return render(request, "core/view_csv.html", {"error": f"Error reading file: {str(e)}"})
