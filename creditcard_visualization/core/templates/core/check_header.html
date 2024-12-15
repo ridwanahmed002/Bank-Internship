@@ -1,3 +1,60 @@
-<h1>Check CSV Header</h1>
-<p>This page will show the first 10 rows of the uploaded CSV.</p>
-<a href="{% url 'upload_file' %}">Back</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Header</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+        }
+        h1, h2 {
+            margin-bottom: 20px;
+        }
+        table {
+            margin-top: 20px;
+        }
+        .container {
+            margin-top: 40px;
+        }
+        .btn-back {
+            margin-top: 20px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Dataset Overview</h1>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% else %}
+            <div>
+                <h2>First 10 Rows of the Dataset</h2>
+                <div class="table-responsive">
+                    {{ head_data|safe }}
+                </div>
+            </div>
+
+            <div>
+                <h2>Dataset Description</h2>
+                <div class="table-responsive">
+                    {{ describe_data|safe }}
+                </div>
+            </div>
+        {% endif %}
+
+        <a href="{% url 'upload_file' %}" class="btn btn-primary btn-back">Back to Upload Page</a>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
