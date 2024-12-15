@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Dataset</title>
+</head>
+<body>
+    <h1>Upload Dataset</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file">File:</label>
+        <input type="file" id="file" name="file" onchange="displayFileName()">
+        <span id="file-name" style="margin-left: 10px; font-weight: bold;"></span>
+        <br><br>
+        <button type="submit">Upload</button>
+    </form>
+
+    <script>
+        function displayFileName() {
+            const fileInput = document.getElementById("file");
+            const fileNameDisplay = document.getElementById("file-name");
+
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = fileInput.files[0].name;
+            } else {
+                fileNameDisplay.textContent = "";
+            }
+        }
+    </script>
+
+    {% if file_url %}
+        <p>File "{{ file_name }}" uploaded successfully! You can view the file here: 
+            <a href="{{ file_url }}" target="_blank">View File</a>
+        </p>
+    {% endif %}
+</body>
+</html>
